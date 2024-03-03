@@ -15,3 +15,5 @@ Model Files: https://huggingface.co/seanghay/uvr_models/tree/main
 cog predict -i music_input=@bolsoremix.wav -i audioSeparator=True -i sonify=True -i visualize=True
 
 Original commit: https://github.com/mir-aidj/all-in-one/tree/ac942b8663b69f972407c79c28ff09986fad63c3
+
+Using cog on Windows 11 with WSL 2: https://github.com/replicate/cog/blob/main/docs/wsl2/wsl2.md
