@@ -1,27 +1,32 @@
-from predict import Predictor
 from pathlib import Path
+from predict import Predictor
+import json
 
-def test_bpm_detection():
-    # Initialize the predictor
+def main():
+    # Initialize predictor
     predictor = Predictor()
-    predictor.setup()
     
-    # Test with test.mp3 from root folder
-    test_audio = Path("test.mp3")
+    # Test file path
+    test_file = Path("test.mp3")
     
     # Run prediction
     result = predictor.predict(
-        music_input=test_audio,
-        visualize=False,
-        sonify=False,
+        music_input=test_file,
+        visualize=True,
+        sonify=True,
         model="harmonix-all",
-        include_activations=False,
-        include_embeddings=False,
-        audioSeparator=False
+        include_activations=True,
+        include_embeddings=True
     )
     
-    # Print the BPM result
+    # Print detailed results
+    print("\nBPM Detection Results:")
+    print("---------------------")
     print(f"Detected BPM: {result.bpm}")
+    print("\nRaw tempo estimates:")
+    print(json.dumps(result.tempo_estimates, indent=2))
+    print("\nTempo confidence scores:")
+    print(json.dumps(result.tempo_scores, indent=2))
 
 if __name__ == "__main__":
-    test_bpm_detection() 
+    main() 

@@ -8,6 +8,8 @@ import torch
 import allin1
 import os 
 import librosa
+import numpy as np
+from collections import Counter
 
 # ----------------------- AUDIO-SEPARATOR , DEIXEI OS EXECUTANDO PARALELAMENTE------------------------
 # import torch
@@ -161,16 +163,48 @@ class Predictor(BasePredictor):
     def run_allin1_analyze(self, music_input, visualize, sonify, model, include_activations, include_embeddings):
         allin1_output_dir = {}
 
-        # Add BPM detection with improved accuracy
-        y, sr = librosa.load(str(music_input))
+        # Load audio with higher sample rate for better temporal resolution
+        y, sr = librosa.load(str(music_input), sr=44100)
         
-        # Use dynamic programming beat tracker for more accurate BPM detection
-        onset_env = librosa.onset.onset_strength(y=y, sr=sr)
-        tempo, beats = librosa.beat.beat_track(onset_envelope=onset_env, sr=sr)
+        # Compute onset strength with multiple features
+        onset_env = librosa.onset.onset_strength_multi(y=y, sr=sr, 
+                                                      channels=[0, 1, 2, 3],  # Use multiple frequency bands
+                                                      aggregate=np.median)  # Use median for robustness
         
-        # Convert tempo to float and round to nearest integer
-        tempo = float(tempo)
-        allin1_output_dir["bpm"] = round(tempo)
+        # Get multiple tempo estimates
+        tempos = []
+        
+        # Method 1: Dynamic programming beat tracker
+        tempo1, beats1 = librosa.beat.beat_track(onset_envelope=onset_env, sr=sr)
+        tempos.append(tempo1)
+        
+        # Method 2: Autocorrelation-based tempo estimation
+        tempo2 = librosa.beat.tempo(onset_envelope=onset_env, sr=sr, aggregate=None)
+        tempos.extend(tempo2)
+        
+        # Method 3: Tempogram-based estimation
+        tempogram = librosa.feature.tempogram(onset_envelope=onset_env, sr=sr)
+        tempo3 = librosa.beat.tempo(onset_envelope=onset_env, sr=sr, 
+                                  prior=librosa.beat.tempo(onset_envelope=onset_env, sr=sr)[0])
+        tempos.append(tempo3)
+        
+        # Find the most consistent tempo estimate
+        # Convert all tempos to float and round to nearest 0.5
+        tempos = [round(float(t) * 2) / 2 for t in tempos]
+        
+        # Calculate tempo confidence scores
+        tempo_scores = {}
+        for tempo in tempos:
+            # Score based on how many times this tempo appears
+            count = tempos.count(tempo)
+            # Additional score for tempos that are close to other estimates
+            close_tempos = sum(1 for t in tempos if abs(t - tempo) <= 1.0)  # Increased range to 1.0 BPM
+            tempo_scores[tempo] = count + (close_tempos * 0.5)
+        
+        # Select the tempo with the highest confidence score
+        final_tempo = max(tempo_scores.items(), key=lambda x: x[1])[0]
+            
+        allin1_output_dir["bpm"] = final_tempo
 
         allin1.analyze(paths=music_input, out_dir='output', visualize=visualize, sonify=sonify, model=model, device=self.device, include_activations=include_activations, include_embeddings=include_embeddings, keep_byproducts=True, )
         
