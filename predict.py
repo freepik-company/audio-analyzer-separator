@@ -7,6 +7,7 @@ from cog import BasePredictor, BaseModel, Input, Path
 import torch
 import allin1
 import os 
+import librosa
 
 # ----------------------- AUDIO-SEPARATOR , DEIXEI OS EXECUTANDO PARALELAMENTE------------------------
 # import torch
@@ -34,6 +35,7 @@ class Output(BaseModel):
     demucs_guitar: Optional[Path]
     demucs_piano: Optional[Path]
     demucs_other: Optional[Path]
+    bpm: Optional[float]
 
 
 class Predictor(BasePredictor):
@@ -126,7 +128,8 @@ class Predictor(BasePredictor):
             demucs_drums=output_dir.get("demucs_drums"),
             demucs_guitar=output_dir.get("demucs_guitar"),
             demucs_piano=output_dir.get("demucs_piano"),
-            demucs_other=output_dir.get("demucs_other")            
+            demucs_other=output_dir.get("demucs_other"),
+            bpm=output_dir.get("bpm")
         )
             # return output_dir
     
@@ -157,6 +160,11 @@ class Predictor(BasePredictor):
 
     def run_allin1_analyze(self, music_input, visualize, sonify, model, include_activations, include_embeddings):
         allin1_output_dir = {}
+
+        # Add BPM detection
+        y, sr = librosa.load(str(music_input))
+        tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
+        allin1_output_dir["bpm"] = float(tempo)
 
         allin1.analyze(paths=music_input, out_dir='output', visualize=visualize, sonify=sonify, model=model, device=self.device, include_activations=include_activations, include_embeddings=include_embeddings, keep_byproducts=True, )
         

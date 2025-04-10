@@ -1,5 +1,4 @@
---extra-index-url https://download.pytorch.org/whl/cu118
-torch==2.0.1
+torch>=2.6.0
 hydra-core>=1.1
 huggingface_hub
 tqdm
@@ -10,4 +9,5 @@ librosa
 PyMuPDF
 git+https://github.com/CPJKU/madmom
 ninja
-audio-separator[gpu]
+audio-separator
+cog
