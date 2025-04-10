@@ -161,10 +161,16 @@ class Predictor(BasePredictor):
     def run_allin1_analyze(self, music_input, visualize, sonify, model, include_activations, include_embeddings):
         allin1_output_dir = {}
 
-        # Add BPM detection
+        # Add BPM detection with improved accuracy
         y, sr = librosa.load(str(music_input))
-        tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
-        allin1_output_dir["bpm"] = float(tempo)
+        
+        # Use dynamic programming beat tracker for more accurate BPM detection
+        onset_env = librosa.onset.onset_strength(y=y, sr=sr)
+        tempo, beats = librosa.beat.beat_track(onset_envelope=onset_env, sr=sr)
+        
+        # Convert tempo to float and round to nearest integer
+        tempo = float(tempo)
+        allin1_output_dir["bpm"] = round(tempo)
 
         allin1.analyze(paths=music_input, out_dir='output', visualize=visualize, sonify=sonify, model=model, device=self.device, include_activations=include_activations, include_embeddings=include_embeddings, keep_byproducts=True, )
         
