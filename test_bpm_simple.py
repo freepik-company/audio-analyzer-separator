@@ -48,7 +48,7 @@ def detect_bpm(audio_path):
 
 def main():
     # Test file path
-    test_file = Path("test.mp3")
+    test_file = Path("test.test_mp3")
     
     # Run BPM detection
     results = detect_bpm(test_file)

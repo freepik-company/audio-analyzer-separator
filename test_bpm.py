@@ -7,7 +7,7 @@ def main():
     predictor = Predictor()
     
     # Test file path
-    test_file = Path("test.mp3")
+    test_file = Path("test.test_mp3")
     
     # Run prediction
     result = predictor.predict(

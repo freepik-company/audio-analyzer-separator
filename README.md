@@ -1,8 +1,5 @@
 # Audio Analyzer & BPM Detector
 
-[![Python Tests](https://github.com/yourusername/audio-analyzer-separator/actions/workflows/tests.yml/badge.svg)](https://github.com/yourusername/audio-analyzer-separator/actions/workflows/tests.yml)
-[![codecov](https://codecov.io/gh/yourusername/audio-analyzer-separator/branch/main/graph/badge.svg)](https://codecov.io/gh/yourusername/audio-analyzer-separator)
-
 A Python-based audio analysis tool that provides accurate BPM (Beats Per Minute) detection using multiple estimation methods.
 
 ## Features
@@ -49,47 +46,16 @@ result = predictor.predict(
 print(f"Detected BPM: {result.bpm}")
 ```
 
+## Development
+
 ### Running Tests
 
 ```bash
-python -m pytest
-```
+# Run BPM detection test
+python test_bpm_simple.py
 
-## Testing
-
-The project includes automated tests to ensure accurate BPM detection. To run the tests:
-
-```bash
-python -m pytest tests/
-```
-
-### Test Coverage
-
-- Unit tests for BPM detection methods
-- Integration tests with sample audio files
-- Confidence score validation
-
-## Development
-
-### Running Tests Locally
-
-```bash
-# Run all tests
-python -m pytest
-
-# Run with verbose output
-python -m pytest -v
-
-# Run specific test file
-python -m pytest tests/test_bpm.py
-```
-
-### Code Style
-
-This project follows PEP 8 guidelines. To check code style:
-
-```bash
-flake8 .
+# Run audio splitting test
+python test_audio_split.py
 ```
 
 ## Contributing
